@@ -62,6 +62,7 @@ void pop(Node* &current);
 void printQS(Node* current);
 
 int main(){
+  int idekatthispoint = 0;
   /*
   enqueue(queueHead, '1');
   enqueue(queueHead, '+');
@@ -75,7 +76,7 @@ int main(){
   printQS(queueHead);
   dequeue(queueHead);
   dequeue(queueHead);
-  printQS(queueHead);*/
+  printQS(queueHead);
   push(stackHead, '1');
   push(stackHead, '+');
   push(stackHead, '2');
@@ -89,7 +90,8 @@ int main(){
   cout << peek(stackHead)->data << endl;
   pop(stackHead);
   pop(stackHead);
-  printQS(stackHead);
+  cout << peek(stackHead)->data << endl;
+  printQS(stackHead);*/
 
 }
 
@@ -152,18 +154,12 @@ Node* peek(Node* current){
 }
 
 void pop(Node* &current){
-  cout << "test" << endl;
-  if(stackHead->next = NULL){
-    
+  
+  if(stackHead->next == NULL){    
     stackHead = NULL;
   } else {
-    cout << "test2" << endl;
-    cout << stackHead->data << endl;
     Node* temp = stackHead;
-    cout << "test3" << endl;
     while(temp->next->next != NULL){
-      cout << "test4" << endl;
-      cout << temp->data << endl;
       temp = temp->next;
     }
     temp->next = NULL;
