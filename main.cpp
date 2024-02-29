@@ -60,9 +60,49 @@ void push(Node* &current, char data);
 Node* peek(Node* current);
 void pop(Node* &current);
 void printQS(Node* current);
+int precede(char op);
+bool isOpp(char op);
+
 
 int main(){
   int idekatthispoint = 0;
+  char inputt[30];
+
+  cout << "input a infex expression with only numbers and '+', '-', '*', '/', '^', '(', ')' " << endl;
+  cout << "put space between the numbers and expressions" << endl;
+
+  cin.get(inputt, 30, '\n');
+  cin.ignore();
+
+  for(int i = 0;i<strlen(inputt);i++){
+    if(!isspace(inputt[i])){
+	if(isdigit(inputt[i])){
+	  enqueue(queueHead, inputt[i]);
+	} else if(inputt[i]==')'){
+	  while(peek(stackHead)->data != '('){
+	    enqueue(queueHead, peek(stackHead)->data);
+	    pop(stackHead);
+	  }
+	  if(peek(stackHead)->data == '('){
+	    pop(stackHead);
+	  }
+	} else if(!isdigit(inputt[i]) && inputt[i] != '('){
+	  while(peek(stackHead) != NULL && isOpp(peek(stackHead)->data) && precede(inputt[i]) <= precede(peek(stackHead)->data)){
+	    enqueue(queueHead, peek(stackHead)->data);
+	    pop(stackHead);
+	  }
+	  push(stackHead, inputt[i]);
+	}
+	
+      }
+  }
+  while(stackHead != NULL){
+    enqueue(queueHead, peek(stackHead)->data);
+    pop(stackHead);
+  }
+
+  cout << "postfix:" << endl;
+  printQS(queueHead);
   /*
   enqueue(queueHead, '1');
   enqueue(queueHead, '+');
@@ -176,5 +216,27 @@ void printQS(Node* current){
     printQS(current->next);
   } else {
     cout << "end" << endl;
+  }
+}
+
+
+int precede(char op){
+  if(op == '^'){
+    return 3;
+  } else if (op == '*' || op == '/'){
+    return 2;
+    
+  } else if (op == '+' || op == '-'){
+    return 1;
+  }
+  return 0;
+}
+
+
+bool isOpp(char op){
+  if(op == '^' || op == '*' || op == '/' || op == '+' || op == '-') {
+    return true;
+  } else {
+    return false;
   }
 }
