@@ -64,6 +64,7 @@ int precede(char op);
 bool isOpp(char op);
 
 
+
 int main(){
   int idekatthispoint = 0;
   char inputt[30];
@@ -75,22 +76,29 @@ int main(){
   cin.ignore();
 
   for(int i = 0;i<strlen(inputt);i++){
+    cout << inputt[i] << endl;
     if(!isspace(inputt[i])){
 	if(isdigit(inputt[i])){
 	  enqueue(queueHead, inputt[i]);
+	} else if(inputt[i] == '('){
+	  push(stackHead, inputt[i]);
+	
 	} else if(inputt[i]==')'){
 	  while(peek(stackHead)->data != '('){
 	    enqueue(queueHead, peek(stackHead)->data);
 	    pop(stackHead);
+	    //with the ^ commented out, the program runs forever, but with it in it gets a segmentation fault when using parenthesis
 	  }
+	  
 	  if(peek(stackHead)->data == '('){
 	    pop(stackHead);
 	  }
-	} else if(!isdigit(inputt[i]) && inputt[i] != '('){
+	} else if(inputt[i] != '(' && !isdigit(inputt[i])){
 	  while(peek(stackHead) != NULL && isOpp(peek(stackHead)->data) && precede(inputt[i]) <= precede(peek(stackHead)->data)){
 	    enqueue(queueHead, peek(stackHead)->data);
 	    pop(stackHead);
 	  }
+	  
 	  push(stackHead, inputt[i]);
 	}
 	
@@ -170,7 +178,7 @@ void push(Node* &current, char data){
   Node* newNode = new Node(data);
   if(current == NULL){
     current = newNode;
-    stackHead = newNode;
+
     
   } else {
     Node* temp = current;
@@ -195,7 +203,7 @@ Node* peek(Node* current){
 
 void pop(Node* &current){
   
-  if(stackHead->next == NULL){    
+  if(stackHead->next == NULL){
     stackHead = NULL;
   } else {
     Node* temp = stackHead;
