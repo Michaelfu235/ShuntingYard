@@ -56,14 +56,13 @@ Node* stackHead = NULL;
 
 void enqueue(Node* &current, char data);
 void dequeue(Node* &head);
-void push(Node* &current, char data);
+void push(Node* &current, char data, Node* datt);
 Node* peek(Node* current);
 void pop(Node* &current);
 void printQS(Node* current);
 int precede(char op);
 bool isOpp(char op);
-
-
+void buildTree(Node* current);
 
 int main(){
   int idekatthispoint = 0;
@@ -81,13 +80,14 @@ int main(){
 	if(isdigit(inputt[i])){
 	  enqueue(queueHead, inputt[i]);
 	} else if(inputt[i] == '('){
-	  push(stackHead, inputt[i]);
+	  push(stackHead, inputt[i], NULL);
 	
 	} else if(inputt[i]==')'){
 	  while(peek(stackHead)->data != '('){
 	    enqueue(queueHead, peek(stackHead)->data);
 	    pop(stackHead);
 	    //with the ^ commented out, the program runs forever, but with it in it gets a segmentation fault when using parenthesis
+	    //nvm I fixed it
 	  }
 	  
 	  if(peek(stackHead)->data == '('){
@@ -99,7 +99,7 @@ int main(){
 	    pop(stackHead);
 	  }
 	  
-	  push(stackHead, inputt[i]);
+	  push(stackHead, inputt[i], NULL);
 	}
 	
       }
@@ -111,6 +111,18 @@ int main(){
 
   cout << "postfix:" << endl;
   printQS(queueHead);
+  cout << " " << endl;
+  printQS(stackHead);
+
+
+  
+  //turning the postfix into a tree
+  while(queueHead != NULL){
+    buildTree(queueHead);
+    dequeue(queueHead);
+  }
+
+
   /*
   enqueue(queueHead, '1');
   enqueue(queueHead, '+');
@@ -174,7 +186,21 @@ void dequeue(Node* &head){
   }
 }
 
-void push(Node* &current, char data){
+void push(Node* &current, char data, Node* datt){
+  if(datt != NULL){
+    if(current == NULL){
+      current = datt;
+      return;
+    } else {
+      Node* temp = current;
+      while(temp->next != NULL){
+	temp = temp->next;
+      }
+      temp->next = datt;
+      return;
+    }
+    
+  }
   Node* newNode = new Node(data);
   if(current == NULL){
     current = newNode;
@@ -220,7 +246,7 @@ void printQS(Node* current){
   //just for debugging, wont be used in algorithm itself, its just a basic recursive print linked list (wether queue or stack) that prints the next node over and over
   
   if(current != NULL){
-    cout << current->data << " -> ";
+    cout << current->data << " ";
     printQS(current->next);
   } else {
     cout << "end" << endl;
@@ -248,3 +274,37 @@ bool isOpp(char op){
     return false;
   }
 }
+
+
+void buildTree(Node* current){
+  if(current == NULL){
+    return;
+  }
+  if(isdigit(current->data)){
+    push(stackHead, current->data, NULL);
+  } else if (!isdigit(current->data)){
+    if(stackHead == NULL){
+      cout << "invalid expression" << endl;
+      return;
+    }
+    Node* now = new Node(current->data);
+    Node* nRight = new Node(peek(stackHead)->data);
+    nRight->right = peek(stackHead)->right;
+    nRight->left = peek(stackHead)->left;
+    now -> right = nRight;
+    pop(stackHead);
+    if(stackHead == NULL){
+      cout << "invalid expression" << endl;
+      return;
+    }
+    Node* nLeft = new Node(peek(stackHead)->data);
+    nLeft->right = peek(stackHead)->right;
+    nLeft->left = peek(stackHead)->left;
+    now->left = nLeft;
+    pop(stackHead);
+
+    char temptwo = 'q';
+    push(stackHead, temptwo, now);
+  }
+}
+
