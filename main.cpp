@@ -63,20 +63,30 @@ void printQS(Node* current);
 int precede(char op);
 bool isOpp(char op);
 void buildTree(Node* current);
+void infix(Node* current);
+void prefix(Node* current);
+void postfix(Node* current);
+
 
 int main(){
-  int idekatthispoint = 0;
-  char inputt[30];
+  bool justKeepGoing = true;
+  while(justKeepGoing){
 
-  cout << "input a infex expression with only numbers and '+', '-', '*', '/', '^', '(', ')' " << endl;
-  cout << "put space between the numbers and expressions" << endl;
+    queueHead = NULL;
+    stackHead = NULL;
+    int idekatthispoint = 0;
+    char inputt[30];
 
-  cin.get(inputt, 30, '\n');
-  cin.ignore();
+    cout << endl;
+    cout << "-----------------------------------------------------------------------------------------" << endl;
+    cout << "input a infex expression with only numbers and '+', '-', '*', '/', '^', '(', ')' " << endl;
+    cout << "put space between the numbers and expressions" << endl;
 
-  for(int i = 0;i<strlen(inputt);i++){
-    cout << inputt[i] << endl;
-    if(!isspace(inputt[i])){
+    cin.get(inputt, 30, '\n');
+    cin.ignore();
+
+    for(int i = 0;i<strlen(inputt);i++){
+      if(!isspace(inputt[i])){
 	if(isdigit(inputt[i])){
 	  enqueue(queueHead, inputt[i]);
 	} else if(inputt[i] == '('){
@@ -103,26 +113,61 @@ int main(){
 	}
 	
       }
-  }
-  while(stackHead != NULL){
-    enqueue(queueHead, peek(stackHead)->data);
-    pop(stackHead);
-  }
+    }
+    while(stackHead != NULL){
+      enqueue(queueHead, peek(stackHead)->data);
+      pop(stackHead);
+    }
 
-  cout << "postfix:" << endl;
-  printQS(queueHead);
-  cout << " " << endl;
-  printQS(stackHead);
+    while(queueHead != NULL){
+      buildTree(queueHead);
+      dequeue(queueHead);
+    }
+
+    bool justKeepGoing2 = true;
+    while(justKeepGoing2 == true){
+      cout << endl;
+      cout << "do you want it in prefix(E), infix(I) or postfix(O), or new expression(N) or quit(Q)" << endl;
+      char inputy;
+      cin >> inputy;
+      cin.ignore();
+      if(inputy == 'E'){
+	prefix(stackHead);
+      } else if (inputy == 'I'){
+	infix(stackHead);
+      } else if (inputy == 'O'){
+	postfix(stackHead);
+      } else if (inputy == 'N'){
+	justKeepGoing2 = false;
+      } else if (inputy == 'Q'){
+	justKeepGoing2 = false;
+	justKeepGoing = false;
+      }
+    }
+
+    /*
+    
+    cout << "postfix:" << endl;
+    printQS(queueHead);
+    cout << " " << endl;
+    printQS(stackHead);
 
 
   
-  //turning the postfix into a tree
-  while(queueHead != NULL){
-    buildTree(queueHead);
-    dequeue(queueHead);
-  }
+    //turning the postfix into a tree
+    while(queueHead != NULL){
+      buildTree(queueHead);
+      dequeue(queueHead);
+    }
 
-
+    infix(stackHead);
+    cout << endl;
+    cout << "--------------" << endl;
+    postfix(stackHead);
+    cout << endl;
+    cout << "-------------" << endl;
+    prefix(stackHead);
+  
   /*
   enqueue(queueHead, '1');
   enqueue(queueHead, '+');
@@ -152,7 +197,7 @@ int main(){
   pop(stackHead);
   cout << peek(stackHead)->data << endl;
   printQS(stackHead);*/
-
+  }
 }
 
 void enqueue(Node* &current, char data){
@@ -308,3 +353,34 @@ void buildTree(Node* current){
   }
 }
 
+
+void infix(Node* current){
+  if(current != NULL){
+    if(isOpp(current->data)){
+	cout << "( ";
+    }
+    infix(current->left);
+    cout << current->data << " ";
+    infix(current->right);
+    if(isOpp(current->data)){
+      cout << ")";
+    }  
+  }
+}
+
+void prefix(Node* current){
+  if(current != NULL){
+    cout << current->data << " ";
+    prefix(current->left);
+    prefix(current->right);
+  }
+}
+
+
+void postfix(Node* current){
+  if(current != NULL){
+    postfix(current->left);
+    postfix(current->right);
+    cout << current->data << " ";
+  }
+}
