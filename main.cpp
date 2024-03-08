@@ -1,6 +1,6 @@
 //Author: Michael Fu
 //Date: 2/27/2024
-//Description:
+//Description: this program takes an infix expression and makes it into a postfix expression using a shunting yard algorithm, then puts it into an expression tree. Then it asks the user if they want it in prefix infix or postfix or if they want to put in a new expression or if they want to quit. 
 
 #include <iostream>
 #include <cstring>
@@ -8,6 +8,7 @@
 using namespace std;
 
 
+//the class node with a data for the character, with a next for use in the queue and stack, and left and right used for the tree
 class Node {
 
 public:
@@ -23,37 +24,14 @@ public:
     left = NULL;
     right = NULL;
   }
-  /*
-  char getData(){
-    return data;
-    
-  }
-  Node* getnext(){
-    return next;
-  }
-  void setNext(Node* node){
-    ext = node;
-  }
-  Node* getLeft() {
-    return left;
-  }
   
-  void setLeft(Node* node) {
-    left = node;
-  }
-  
-  Node* getRight() {
-    return right;
-  }
-  
-  void setRight(Node* node) {
-    right = node;
-    }*/
 };
 
+//the head of the Queue and the head of the stack
 Node* queueHead = NULL;
 Node* stackHead = NULL;
 
+//all the functions neccesary for the queue, stack, tree, and postfix and infix
 void enqueue(Node* &current, char data);
 void dequeue(Node* &head);
 void push(Node* &current, char data, Node* datt);
@@ -69,22 +47,29 @@ void postfix(Node* current);
 
 
 int main(){
+  //justkeepgoing boolean for the repeated loop
   bool justKeepGoing = true;
   while(justKeepGoing){
 
+    //reset queueHead and stackhead to null
     queueHead = NULL;
     stackHead = NULL;
-    int idekatthispoint = 0;
+
+    //input cstring
     char inputt[30];
 
+    //ask the user what expression they want to put in
     cout << endl;
     cout << "-----------------------------------------------------------------------------------------" << endl;
     cout << "input a infex expression with only numbers and '+', '-', '*', '/', '^', '(', ')' " << endl;
     cout << "put space between the numbers and expressions" << endl;
 
+    //input the expression
     cin.get(inputt, 30, '\n');
     cin.ignore();
 
+    //shunting yard algorithm:
+    //loop through the input, and if its a digit then enqueue it immediatly, if its an open parenthesis then put it to the stack, if its a clothes paraenthesis, then go through the stack and add them to the queue until we reach a closed parenthesis, then pop the closed parenthesis. if the input character[i] isnt a open parenthesis and isnt a digit, then while the stack head isnt null and is an operator and input[i] has more precedence than stackHead, then enqueue the stackhead and pop the stackhead. Lastly, push input[i] onto the stack
     for(int i = 0;i<strlen(inputt);i++){
       if(!isspace(inputt[i])){
 	if(isdigit(inputt[i])){
@@ -114,16 +99,20 @@ int main(){
 	
       }
     }
+
+    //then at the end, put all the things on the stack into the queue
     while(stackHead != NULL){
       enqueue(queueHead, peek(stackHead)->data);
       pop(stackHead);
     }
 
+    //then go through the queue and call the buildtree fuction
     while(queueHead != NULL){
       buildTree(queueHead);
       dequeue(queueHead);
     }
 
+    //then create a new bool of justkeepgoing2 and keep going through, asking if the user wants to get their expression in prefix, infix or postfix, enter a new expressoin or if they want to quit. then call the appropiate function (infix prefix and postfix) or set the looping variables to false depending on the users input.
     bool justKeepGoing2 = true;
     while(justKeepGoing2 == true){
       cout << endl;
@@ -145,61 +134,10 @@ int main(){
       }
     }
 
-    /*
-    
-    cout << "postfix:" << endl;
-    printQS(queueHead);
-    cout << " " << endl;
-    printQS(stackHead);
-
-
-  
-    //turning the postfix into a tree
-    while(queueHead != NULL){
-      buildTree(queueHead);
-      dequeue(queueHead);
-    }
-
-    infix(stackHead);
-    cout << endl;
-    cout << "--------------" << endl;
-    postfix(stackHead);
-    cout << endl;
-    cout << "-------------" << endl;
-    prefix(stackHead);
-  
-  /*
-  enqueue(queueHead, '1');
-  enqueue(queueHead, '+');
-  enqueue(queueHead, '2');
-  enqueue(queueHead, '-');
-  enqueue(queueHead, '3');
-  enqueue(queueHead, '*');
-  enqueue(queueHead, '4');
-  enqueue(queueHead, '/');
-  enqueue(queueHead, '5');
-  printQS(queueHead);
-  dequeue(queueHead);
-  dequeue(queueHead);
-  printQS(queueHead);
-  push(stackHead, '1');
-  push(stackHead, '+');
-  push(stackHead, '2');
-  push(stackHead, '-');
-  push(stackHead, '3');
-  push(stackHead, '*');
-  push(stackHead, '4');
-  push(stackHead, '/');
-  push(stackHead, '5');
-  printQS(stackHead);
-  cout << peek(stackHead)->data << endl;
-  pop(stackHead);
-  pop(stackHead);
-  cout << peek(stackHead)->data << endl;
-  printQS(stackHead);*/
   }
 }
 
+//for the queue, if the queueHead is null, set it to the new node, otherwise loop through the queue until you get to the end and set the end to newNode
 void enqueue(Node* &current, char data){
   Node* newNode = new Node(data);
   //newNode->next = NULL;
@@ -216,6 +154,7 @@ void enqueue(Node* &current, char data){
   
 }
 
+//for the dequeue, if the only item is head, then delete head and set queueHead to null, otherwise replace head with head->next (delete head basically)
 void dequeue(Node* &head){
   if(head == NULL){
     return;
@@ -231,6 +170,9 @@ void dequeue(Node* &head){
   }
 }
 
+//for the push function, there are 2 cases: if datt isn't null, and if datt is (this way you can push nodes with only data as well as the node, if there are "next"s attached to the node we want to push. (for future reference, try to make it only take in the node for easier time)
+//if datt is a node, set current (stackHead will be the one inputted) to datt if it's null, and otherwise, keep going to the next in the list until it's at the end. Then add datt to the end.
+//if datt is null, create a new node with the data, and go through the same process as with datt, but using newNode as the node to be added
 void push(Node* &current, char data, Node* datt){
   if(datt != NULL){
     if(current == NULL){
@@ -260,7 +202,7 @@ void push(Node* &current, char data, Node* datt){
   }
 }
 
-
+//for the peek function, keep going until the end of the stack linked list, and just return the last one (as a node)
 Node* peek(Node* current){
   if(current == NULL){
     return NULL;
@@ -272,6 +214,8 @@ Node* peek(Node* current){
   }
 }
 
+
+//for the pop function, if theres only 1 element, set stackhead to null, and if not, keep looping through, checking temp->next->next to set temp->next to null if temp->next was the last node. (remove the last element in the linked list of stackhead)
 void pop(Node* &current){
   
   if(stackHead->next == NULL){
@@ -299,6 +243,7 @@ void printQS(Node* current){
 }
 
 
+//function that gives the precedence of the functions, with ^ being value 3, */ being value 2, and +- being value 1. Otherwise, return 0
 int precede(char op){
   if(op == '^'){
     return 3;
@@ -312,6 +257,7 @@ int precede(char op){
 }
 
 
+//function to check if the character given is an operator (for future reference, this can be combined with the precede function, since it gives 0 if the character put into precede isn't a operator)
 bool isOpp(char op){
   if(op == '^' || op == '*' || op == '/' || op == '+' || op == '-') {
     return true;
@@ -321,10 +267,15 @@ bool isOpp(char op){
 }
 
 
+//build tree function
 void buildTree(Node* current){
+
+  //if the given node is null (queueHead is null), just return since theres nothing to do
   if(current == NULL){
     return;
   }
+  //then if the given current node is a digit, then add it to the stack
+  //else if its not a digit, then if stackhead is null, then it's an invalid expression
   if(isdigit(current->data)){
     push(stackHead, current->data, NULL);
   } else if (!isdigit(current->data)){
@@ -332,28 +283,38 @@ void buildTree(Node* current){
       cout << "invalid expression" << endl;
       return;
     }
+    //if the expression is valid, then create a temp node now using the data (the operator)
     Node* now = new Node(current->data);
+    //nRight is a new temp node that uses the data from the last element of stack
     Node* nRight = new Node(peek(stackHead)->data);
+
+    //set nRight to the peek(stack)'s right and nLeft to it's left and set now's right to nRight
     nRight->right = peek(stackHead)->right;
     nRight->left = peek(stackHead)->left;
     now -> right = nRight;
+    //then pop stack
     pop(stackHead);
     if(stackHead == NULL){
+      //if stackHead is now null, then that means the expression was invalid (numbers and operators dont add up)
       cout << "invalid expression" << endl;
       return;
     }
+
+    //do the same thing as above with nRight, but using nLeft
     Node* nLeft = new Node(peek(stackHead)->data);
     nLeft->right = peek(stackHead)->right;
     nLeft->left = peek(stackHead)->left;
     now->left = nLeft;
     pop(stackHead);
 
+    
     char temptwo = 'q';
     push(stackHead, temptwo, now);
   }
 }
 
 
+//for the infix, print out a left parenthesis before each operator and the number, and a right parenthesis after each operator and the number, 
 void infix(Node* current){
   if(current != NULL){
     if(isOpp(current->data)){
@@ -368,6 +329,7 @@ void infix(Node* current){
   }
 }
 
+//for the prefix, print out the operator, then recursively call the function again so that it prints out the numbers at the end of the function
 void prefix(Node* current){
   if(current != NULL){
     cout << current->data << " ";
@@ -377,6 +339,7 @@ void prefix(Node* current){
 }
 
 
+//for the postfix, print out the two parts of the operator, then the operator and recursively call the function 
 void postfix(Node* current){
   if(current != NULL){
     postfix(current->left);
